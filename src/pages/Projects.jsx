@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import ProjectForm from "../components/ProjectForm";
 import axios from "axios";
 
@@ -27,20 +28,61 @@ const Projects = () => {
           Your Projects
         </h3>
         <ul className="space-y-2">
-          {Array.isArray(projects) &&
-            projects.map((proj) => (
-              <li
-                key={proj.projectId}
-                className="bg-gray-100 dark:bg-gray-700 p-4 rounded shadow"
+          {projects.map((proj) => (
+            <li
+              key={proj.projectId}
+              className="bg-gray-100 dark:bg-gray-700 p-4 rounded shadow"
+            >
+              <Link to={`/projects/${proj.projectId}`}>
+                <div className="p-4 bg-gray-800 rounded">
+                  <h3>{proj.name}</h3>
+                  <p>{proj.description}</p>
+                </div>
+              </Link>
+
+              {/* 🆕 Scan Upload Form */}
+              <form
+                className="mt-4"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const fileInput =
+                    e.target.elements[`scanFile-${proj.projectId}`];
+                  const file = fileInput.files[0];
+                  if (!file) return;
+
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  formData.append("projectId", proj.projectId);
+
+                  try {
+                    const res = await axios.post("/api/scan/start", formData, {
+                      headers: {
+                        "Content-Type": "multipart/form-data",
+                      },
+                    });
+                    console.log("Scan started:", res.data);
+                    alert("Scan started successfully!");
+                  } catch (err) {
+                    console.error("Failed to start scan:", err);
+                    alert("Failed to start scan.");
+                  }
+                }}
               >
-                <h4 className="text-lg font-bold dark:text-white">
-                  {proj.name}
-                </h4>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {proj.description}
-                </p>
-              </li>
-            ))}
+                <input
+                  type="file"
+                  name={`scanFile-${proj.projectId}`}
+                  className="mb-2 block text-sm"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                >
+                  Start Scan
+                </button>
+              </form>
+            </li>
+          ))}
         </ul>
       </div>
     </div>
