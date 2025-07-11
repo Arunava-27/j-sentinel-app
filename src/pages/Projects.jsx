@@ -80,6 +80,21 @@ const Projects = () => {
                 >
                   Start Scan
                 </button>
+                <button
+                  onClick={async () => {
+                    if (confirm("Delete this project?")) {
+                      try {
+                        await axios.delete(`/api/projects/${proj.projectId}`);
+                        fetchProjects();
+                      } catch (err) {
+                        console.error("Delete failed:", err);
+                      }
+                    }
+                  }}
+                  className="ml-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
               </form>
             </li>
           ))}
